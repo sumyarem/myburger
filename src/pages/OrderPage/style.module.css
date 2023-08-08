@@ -1,0 +1,27 @@
+/* Style for the search container */
+.container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    /* Style for the search input */
+    .search-input {
+      width: 300px;
+      height: 30px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+    }
+    
+    /* Optional: Add more styles to the input on focus or hover */
+    .search-input:focus {
+      border-color: #007bff;
+    }
+    
+    .search-input:hover {
+      border-color: #999;
+    }
+    
