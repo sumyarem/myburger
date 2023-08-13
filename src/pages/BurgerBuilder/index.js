@@ -1,69 +1,62 @@
-import React, {Component} from "react";
+import React, {useState} from "react";
 import BuildControls from "../../components/BuildControls";
 import Burger from  "../../components/Burger"
 import Modal from "../../components/General/Modal";
 import OrderSummary from "../../components/OrderSummary";
-import axios from "../../axios-orders";
-import Spinner from "../../components/General/Spinner";
-import * as actions from "../../redux/actions/burgerActions";
-import { withRouter } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 
-class BurgerBuilder extends Component {
+
+
+const BurgerBuilder = props => {
+
+      const history = useHistory();
+      console.log("props:", props);
+      const [confirmOrder,setConfirmOrder] = useState(false);
       
-      state = {
-            
-            
-            confirmOrder:false,
       
-      };
-      componentDidMount = () => {
-      };
-      continueOrder = () => {
-            console.log("this.props.history:", this.props.history.push);
-            this.props.history.push('/ship');
+      
+      const continueOrder = () => {
+            history.push('/ship');
             };
             
                   
       
-      showConfitmModal = () => {
-            this.setState({confirmOrder:true});
+      const showConfitmModal = () => {
+            setConfirmOrder(true);
+            
       };
-      closeConfitmModal = () => {
-            this.setState({confirmOrder:false});
+      const closeConfitmModal = () => {
+            setConfirmOrder(false);
+            
       };
       
-      render(){
+      
       
             return(
                   <div>
 
                   
-                  <Modal closeConfitmModal={this.closeConfitmModal} show ={this.state.confirmOrder}>
+                  <Modal closeConfitmModal={closeConfitmModal} show ={confirmOrder}>
 
-                        {this.state.loading ? ( 
-                              <Spinner /> ) : (
-                        <OrderSummary onCancel={this.closeConfitmModal}
-                        onContinue={this.continueOrder}
+                        
+                        <OrderSummary onCancel={closeConfitmModal}
+                        onContinue={continueOrder}
                         
                         />
-                              )}
+                        
                               
                   </Modal>
-                  
+                        
                         <Burger/>
                         <BuildControls 
-                        showConfitmModal= {this.showConfitmModal}
-                        
-                        
-                        
-                        
-                        ortsNemeh={this.props.burgertOrtsNem} ortsHasah={this.props.burgertOrtsHas}/>
+                        showConfitmModal= {showConfitmModal}
+                        />
                         
                   </div>
             );
       }
-}
 
 
-export default  withRouter(BurgerBuilder);
+
+export default  BurgerBuilder;

@@ -1,47 +1,43 @@
-import React from "react";
+import React, {useContext} from "react";
 import Burger from "../../components/Burger";
 import Button from "../../components/General/Button";
 import css from "./style.module.css";
-import { Route, Link,Router } from "react-router-dom";
+import { Route,Switch } from "react-router-dom";
 import ContactData from "../../components/ContactData";
-import { connect } from "react-redux";
-import { Switch } from "react-router-dom/cjs/react-router-dom.min";
-import { withRouter } from "react-router-dom"; 
+import BurgerContext from "../../context/burgercontext";
+import {useHistory} from "react-router-dom";
 
+const ShippingPage = (props) => {
+const history = useHistory();
+      const ctx = useContext(BurgerContext);
 
- class ShippingPage extends React.Component {
-
-
-
-
-cancelOrder = () => {
-this.props.history.goBack();
+const cancelOrder = () => {
+history.goBack();
 };
 
-showContactData = () => {
-      console.log("this.props.history:", this.props.history); // Check if history object is present
-      this.props.history.replace("/ship/contact");
-    };
-    
+const showContactData = () => {
+      console.log("props.history:", history); // Check if history object is present
+      history.replace("/ship/contact");
+};
 
-render() {
+
 return (
       <div className={css.ShippingPage}>
       <p style={{ marginTop: 72 }}>
       <strong>ТАНЫ ЗАХИАЛАГА</strong>
       </p>
       <p style={{ marginTop: 72 }}>
-      <strong>Дүн: {this.props.price}$</strong>
+      <strong>Дүн: {ctx.burger.totalPrice}$</strong>
       </p>
 
       <Burger/>
       <Button
-      daragdsan={this.cancelOrder}
+      daragdsan={cancelOrder}
       btnType="Danger"
       text=" Захиалага цуцлах"
       />
       <Button
-      daragdsan={this.showContactData}
+      daragdsan={showContactData}
       btnType="Success"
       text=" ХҮРГЭЛТИЙН МЭДЭЭЛЭЛ"
       />
@@ -50,18 +46,14 @@ return (
       
 
 <Switch>
-<Route path="/ship/contact" element={<ContactData />} />
+<Route path="/ship/contact" component={ContactData} />
 </Switch>
 
       </div>
 );
 }
-}
 
 
-const mapStateTopProps = state =>{
-      return{
-            price: state.burgerReducer.totalPrice
-      };
-};
-export default withRouter(connect( mapStateTopProps)(ShippingPage));
+
+
+export default ShippingPage;

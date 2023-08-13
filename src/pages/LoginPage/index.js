@@ -1,60 +1,61 @@
-import React, { Component } from "react";
+import React, { useState, useContext } from "react";
 import css from "./style.module.css";
 import Button from "../../components/General/Button";
-import { connect } from "react-redux";
-import * as actions from "../../redux/actions/loginActions";
 import Spinner from "../../components/General/Spinner";
 import {Redirect} from "react-router-dom";
-class LoginPage extends Component {
-state = {
+import UserContext from "../../context/UserContext";
+
+const LoginPage = (props) =>  {
+
+     const ctx = useContext(UserContext);
+
+const [form, setForm] = useState({
      email: "",
      password: ""
-};
-changeEmail = (e) => {
-     this.setState({email: e.target.value})
+});
+
+
+const changeEmail = e => {
+     const newEmail = e.target.value
+     setForm((formBefore) => ({
+          email: newEmail, 
+          password: formBefore.password 
+     }));
+     
 };
 
-changePassword = (e) => {
-     this.setState({password: e.target.value})
-};
-login = () => {
+const changePassword = e => {
+     const newPassword = e.target.value
+     setForm((formBefore) => ({
+          email: formBefore.email, 
+          password: newPassword 
+     }));
      
-     this.props.login(this.state.email,this.state.password  )
+};
+const login = () => {
+     
+     ctx.loginUser(form.email, form.password)
 }
-render(){
+
 
 return (
      <div className={css.container}>
 
-     {this.props.userId && <Redirect to="/orders"/> }
+     {ctx.state.userId && <Redirect to="/orders"/> }
           <h2>Login</h2>
           <form className="login-form" >
                
-               <input  onChange={this.changeEmail} type="text" placeholder="Имэйл хаяг" id="email" name="email" />
+               <input  onChange={changeEmail} type="text" placeholder="Имэйл хаяг" />
                
-               <input onChange={this.changePassword} type="password" placeholder="Нууц үг" id="password" name="password" />
+               <input onChange={changePassword} type="password" placeholder="Нууц үг"  />
 
-               {this.props.logginIn && <Spinner/>}
-               {this.props.firebaseError && <div style={{color: "red"}}>{this.props.firebaseError}Код нь: {this.props.firebaseErrorCode}</div>}
-               <Button text="Логин" btnType="Success" daragdsan={this.login}/>
+               {ctx.state.logginIn && <Spinner/>}
+               {ctx.state.error && <div style={{color: "red"}}>{ctx.state.error}Код нь: {ctx.state.errorcode}</div>}
+               <Button text="Логин" btnType="Success" daragdsan={login}/>
           </form>
           
      </div>
 )
 }
-}
 
-const mapStateToProps = state => {
-return{
-     logginIn: state.signuploginReducer.logginIn,
-     firebaseError: state.signuploginReducer.firebaseError,
-     firebaseErrorCode: state.signuploginReducer.firebaseErrorCode,
-     userId: state.signuploginReducer.userId
-};
-};
-const mapDispatchToProps = (dispatch) => {
-     return {
-          login: (email,password) => dispatch(actions.loginUser(email,password))
-     }
-}
-export default connect(mapStateToProps,mapDispatchToProps ) (LoginPage);
+export default LoginPage;

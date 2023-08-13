@@ -1,10 +1,13 @@
-import React from "react";
+import React, {useContext} from "react";
 import BuildControl from "../BuildControl";
 import css from "./style.module.css";
-import { connect } from "react-redux";
-import * as actions from "../../redux/actions/burgerActions";
+import BurgerContext from "../../context/burgercontext";
+
 const BuildControls = props => {
-      const disabledIngrediendts = {...props.burgeriinOrts};
+
+      const ctx = useContext(BurgerContext);
+
+      const disabledIngrediendts = {...ctx.burger.ingredients};
 
             for (let key in disabledIngrediendts) {
                   disabledIngrediendts[key] = disabledIngrediendts[key] <= 0;
@@ -13,18 +16,16 @@ const BuildControls = props => {
       
       return (
       <div className={css.BuildControls}>
-      <p> Бургерийн үнэ:<strong> {props.price}</strong></p>
+      <p> Бургерийн үнэ:<strong> {ctx.burger.totalPrice}</strong></p>
 
       
-            {Object.keys(props.ingredientNames).map(el =>( 
+            {Object.keys(ctx.burger.ingredientNames).map(el =>( 
 
                   <BuildControl
-                  key={[el]}
-      ortsNemeh={props.ortsNemeh} 
-      ortsHasah={props.ortsHasah} 
+                  key={[el]} 
       disabled={disabledIngrediendts}
       type={el} 
-      orts={props.ingredientNames[el]}
+      orts={ctx.burger.ingredientNames[el]}
       />
 
             ))}
@@ -32,7 +33,7 @@ const BuildControls = props => {
 
       <button 
       onClick={props.showConfitmModal}
-      disabled={!props.purchasing}
+      disabled={!ctx.burger.purchasing}
       className={css.OrderButton}>Захиалах</button>
       
       
@@ -40,20 +41,7 @@ const BuildControls = props => {
       </div>
       )
 }
-const mapStateToProps = state => {
-      return{
-            burgeriinOrts: state.burgerReducer.ingredients,
-            price: state.burgerReducer.totalPrice,
-            purchasing: state.burgerReducer.purchasing,
-            ingredientNames: state.burgerReducer.ingredientNames
-      };
-};
 
 
-const mapDispatchToProps = dispatch =>{
-      return{
-            ortsNemeh: ortsNer => dispatch(actions.addingredient(ortsNer)),
-            ortsHasah: ortsNer => dispatch(actions.removeingredient(ortsNer)),
-      };
-};
-export default connect(mapStateToProps,mapDispatchToProps)(BuildControls);
+
+export default BuildControls;

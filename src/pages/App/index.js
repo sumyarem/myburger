@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useEffect, useState,Suspense,useContext} from 'react';
 import css from'./style.module.css';
 
 import Toolbar from "../../components/Toolbar";
@@ -6,24 +6,28 @@ import BurgerBuilder from '../BurgerBuilder';
 import SideBar from '../../components/SideBar';
 import OrderPage from '../OrderPage';
 import  ShippingPage  from '../ShippingPage';
-import { connect } from 'react-redux';
-import * as signupActions from "../../redux/actions/signupActions";
-import {  Route,  Router,  Switch,Link } from 'react-router-dom';
-import ContactData from '../../components/ContactData';
+import {  Route,   Switch} from 'react-router-dom';
 import LoginPage from '../LoginPage';
 import Logout from '../../components/Logout';
-import SignupPage from '../SignupPage';
+import { BurgerStore } from "../../context/burgercontext";
+import { OrderStore } from "../../context/OrdersContext";
 import {Redirect}  from "react-router-dom";
-import * as actions from "../../redux/actions/loginActions";
+import UserContext, { UserStore } from '../../context/UserContext';
 
 
-class App extends Component  {
 
-  state = {
-    showSideBar: false,
-    
-  };
-componentDidMount = () => {
+const SignupPage = React.lazy(() => {
+  return import( '../SignupPage');
+});
+
+const App = (props) =>  {
+
+  const ctx = useContext(UserContext);
+
+
+const [showSideBar, setShowSideBar] = useState(false);
+
+useEffect(() => {
   const token = localStorage.getItem('token');
   const userId = localStorage.getItem('userId');
   const expireDate = new Date( localStorage.getItem('expireDate'));
@@ -31,71 +35,77 @@ componentDidMount = () => {
   if(token){
     if( expireDate > new Date()){
       //hugatsaa n duusaagvi token , automat login hiine
-      this.props.autoLogin(token, userId);
+    ctx.loginUserSuccess(token, userId, expireDate, refreshToken);
       //token hvchingvi bolsnii daraa automataar logout hiine
-      this.props.autoLogoutAfterMillisec(expireDate.getTime() - new Date().getTime());
+      ctx.autoRenewTokenAfterMillisec(expireDate.getTime() - new Date().getTime());
     }else{
       // tokenii hugatsaa duussan, logout
-      this.props.logout();
+      ctx.autoRenewTokenAfterMillisec(3600000);
+      // ctx.logout();
     }
     
   }
-};
+},[]);
 
 
-  toggleSideBar = () => {
-    this.setState(prevState => {
-      return {showSideBar:!prevState.showSideBar};
-    });
-  }
-  render() {
+
+  const toggleSideBar = () => {
+
+    setShowSideBar(prevShowSideBar => !prevShowSideBar);
+    
+  };
   return (
     <div>
-    <Toolbar toggleSideBar= {this.toggleSideBar}/>
-    <SideBar toggleSideBar={this.toggleSideBar} showSideBar={this.state.showSideBar}/>
+    <Toolbar toggleSideBar= {toggleSideBar}/>
+    <SideBar toggleSideBar={toggleSideBar} showSideBar={showSideBar}/>
     <main className={css.Content}>
     
     
-    <div style={{marginTop: 78}}>ХЭРЭГЛЭГЧИЙН id :{this.props.userId}</div>
+    <UserStore>
+    <BurgerStore>
+<Suspense fallback={<div style={{marginTop: 78 }}> Түр хүлээнүү</div>}>
+{ctx.state.userId !== null ? (
 
-    {this.props.userId ? (
+      <Switch>
+      <Route path="/logout" component={Logout} />
+  <Route path="/orders">
+    <OrderStore>
+      <OrderPage/>
+    </OrderStore>
+  </Route>
+  
+  <Route path="/ship" component={ShippingPage} />
+  <Route path="/" component={BurgerBuilder} />
+  
+
+</Switch>
+) : (
 <Switch>
 
-    <Route path="/orders" element={< OrderPage />} />
-    <Route  path="/logout" component ={Logout}/>
-    <Route  path="/ship" element={< ShippingPage />} />
-          <Route exact  path="/" element={< BurgerBuilder />} />
-    
-        </Switch>
-        ) :(
-            <Switch>
-            <Route  path="/login" component ={LoginPage}/>
-          <Route  path="/signup" component ={SignupPage}/>
-          <Redirect to="/login"/>
-        
-    </Switch>
+  <Route path="/login" component={LoginPage} />
+  <Route path="/signup" component={SignupPage} />
+  <Redirect to="/" />
+
+</Switch>
+
         )}
-    {/* <BurgerBuilder/>
-    <ShippingPage/>
-    <ContactData/> */}
-          
+    
+        
+</Suspense>
+</BurgerStore>
+</UserStore>
           
     </main>
   </div>
   );
 };
-};
-const mapStateToProps = state => {
-  return{
-    userId: state.signuploginReducer.userId
-  };
-};
 
-const mapDispatchToProps = dispatch => {
-  return{
-    autoLogin: (token, userId) => dispatch(actions.loginUserSuccess(token, userId)),
-    logout: () => dispatch(signupActions.logout()),
-    autoLogoutAfterMillisec: () => dispatch(signupActions.autoLogoutAfterMillisec())
-  }
-}
-export default connect(mapStateToProps,mapDispatchToProps)(App);
+
+// const mapDispatchToProps = dispatch => {
+//   return{
+//     autoLogin: (token, userId) => dispatch(actions.loginUserSuccess(token, userId)),
+//     logout: () => dispatch(signupActions.logout()),
+//     autoLogoutAfterMillisec: () => dispatch(signupActions.autoLogoutAfterMillisec())
+//   }
+// }
+export default App;

@@ -1,20 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
 import css from "./style.module.css";
-const BuildControl = props => (
+import BurgerContext from "../../context/burgercontext";
+const BuildControl = (props) => {
       
-
+const burgerContext = useContext( BurgerContext );
+return(
 <div className={css.BuildControl}> 
 <div className={css.Label}>{props.orts} </div>
 
 <button
 disabled={props.disabled[props.type]} 
-onClick={() => props.ortsHasah(props.type)} className={css.Less}>хасах</button> 
+onClick={() => burgerContext.removeingredient(props.type)} className={css.Less}>хасах</button> 
 
-<button onClick={() => props.ortsNemeh(props.type)} className={css.More}>Нэмэх</button>
+<button onClick={() => burgerContext.addingredient(props.type)} className={css.More}>Нэмэх</button>
 </div>
-
 );
-
+};
+ 
 
 
 

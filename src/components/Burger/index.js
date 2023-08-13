@@ -1,14 +1,12 @@
-import React from "react";
-import { connect } from "react-redux";
+import React, {useContext,useMemo} from "react";
 import Burgeringredient from "../Burgeringredient";
 import css from "./style.module.css";
-import { useNavigate } from "react-router-dom";
+import BurgerContext from "../../context/burgercontext";
 const Burger = (props) => {
 
 
-
-
-const items= Object.entries(props.orts);
+const burgerContext = useContext(BurgerContext);
+const items = Object.entries(burgerContext.burger.ingredients);
 
 
 let content = [];
@@ -20,19 +18,19 @@ items.map(el => {
 
 if(content.length === 0)content = <p> Хачиртай талхныхаа орцыг сонгонуу...</p>;
 
-return (
-<div className={css.Burger}>
-<Burgeringredient type="BraedTop"/>
-{content}
-<Burgeringredient type="BreadBottom" />
-</div>
-);
+
+return useMemo(() =>{
+      return (
+            <div className={css.Burger}>
+            <Burgeringredient type="BraedTop"/>
+            {content}
+            <Burgeringredient type="BreadBottom" />
+            </div>
+            );
+},[burgerContext.burger.ingredients])
+
 };
 
 
-const mapStateTopProps = state =>{
-      return{
-            orts: state.burgerReducer.ingredients
-      };
-}
-export default connect(mapStateTopProps) (Burger);
+
+export default Burger;

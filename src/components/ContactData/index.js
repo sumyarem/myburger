@@ -1,58 +1,70 @@
-import React from "react";
+import React, {useState, useEffect,useRef,useContext} from "react";
 import css from "./style.module.css";
 import Button from "../General/Button";
 import Spinner from "../General/Spinner";
-import axios from "../../axios-orders";
-import { connect } from "react-redux";
-import * as actions from "../../redux/actions/orderAction";
-import { withRouter } from "react-router-dom"; 
+import { useHistory} from "react-router-dom"; 
+import BurgerContext from "../../context/burgercontext";
+import UserContext from "../../context/UserContext";
 
-class ContactData extends React.Component{
+const ContactData = props => {
+const history = useHistory();
+      const ctx = useContext(BurgerContext);
+      const Uctx = useContext(UserContext);
 
-      state = {
-            hayag: {
-                  name: null,
-                  city: null,
-                  street: null,
-                  
-            }
-      };
-
-      changeName = e => {
-            this.setState({ name: e.target.value});
-      };
-
-      changeStreet = e => {
-            this.setState({ street: e.target.value});
-      };
-
-      changeCity = e => {
-            this.setState({ city: e.target.value});
-      };
+      const [city, setCity] = useState("");
+      const [street, setStreet] = useState("");
+      const [name, setName] = useState("");
 
 
-      componentDidUpdate(){
-            if(
-                  this.props.newOrderStatus.finished &&
-                  !this.props.newOrderStatus.error
-                  ){
-                  this.props.history.replace("/orders");
-            }
+const dunRef = useRef();
+
+useEffect(() => {
+      if(ctx.burger.finished &&!ctx.burger.error){
+            history.replace("/orders");
       }
+      return() => {
+            
+            ctx.clearBurger();
 
-      saveOrder = () =>{
+      };
+},[ctx.burger.finished]);
+      
+
+
+      const changeName = e => {
+            // if(dunRef.current.style.color === "red") 
+            // dunRef.current.style.color === "green"; 
+            // else dunRef.current.style.color === "red";
+            setName(e.target.value);
+            
+      };
+
+      const changeStreet = e => {
+            setStreet(e.target.value);
+            
+      };
+
+      const changeCity = e => {
+            setCity(e.target.value);
+            
+      };
+
+
+      
+
+      const saveOrder = () =>{
             const newOrder = {
-                  userId: this.props.userId,
-                  orts: this.props.ingredients,
-                  dun: this.props.price,
+                  userId: Uctx.state.userId,
+                  orts: ctx.burger.ingredients,
+                  dun: ctx.burger.totalPrice,
                   hayag: {
-                        name: this.state.name,
-                        city: this.state.city,
-                        street: this.state.street
+                        name: name,
+                        city: city,
+                        street: street
                   }
             };
-            this.props.saveOrderAction(newOrder);
-            // this.setState({loading: true });
+            ctx.saveBurger(newOrder, Uctx.state.token);
+            // setState({loading: true });
             // axios
             // .post("/orders.json", order)
             // .then(response => {
@@ -62,65 +74,54 @@ class ContactData extends React.Component{
             //       console.log("order amjiltgvi: " + error);
             // })
             // .finally(() => {
-            //       this.setState({loading: false});
-            //       this.props.history.replace("/orders");
+            //       setState({loading: false});
+            //       props.history.replace("/orders");
             // });
       };
 
-      render(){
-console.log(this.props);
+
             return (
+                  
             <div className={css.container}>
-            Дүн : {this.props.price}
-            <div>
-                  {this.props.newOrderStatus.error && `zahialahga hiihhed aldaa garlaa : ${this.props.newOrderStatus.error}`}
+            <div ref={dunRef}>
+            <strong style={{fontSize: "16px"}}>Дүн : {ctx.burger.totalPrice}</strong>
             </div>
-            {this.props.newOrderStatus.saving ? ( 
+            
+            <div>
+                  {ctx.burger.error && `zahialahga hiihhed aldaa garlaa : ${ctx.burger.error}`}
+            </div>
+            {ctx.burger.saving ? ( 
 
             <Spinner/> 
             ) : (
                   <div>
-                  <input onChange={this.changeName} 
+                  <input onChange={changeName} 
                   style={{marginTop:72 }} 
                   type = "text" name="name" 
                   placeholder="Таны нэр">
 
                   </input>
-            <input onChange={this.changeStreet} 
+            <input onChange={changeStreet} 
             type = "text" 
             name="street" 
-            placeholder="Таны гэрийн хаяг ">
+            placeholder="Таны гэрийн хаяг "/>
 
-            </input>
-            <input onChange={this.changeCity}
+            
+            <input onChange={changeCity}
             type = "text" 
-            name="city" placeholder="Таны хот">
+            name="city" placeholder="Таны хот"/>
 
-            </input>
-            <Button text ="Илгээх" btnType="Success" daragdsan={this.saveOrder}/>
+            
+            <Button text ="Илгээх" btnType="Success" daragdsan={saveOrder}/>
             </div>
             )}
             </div>
             );
       }
-}
 
 
-const mapStateToProps = state =>{
-      return{
-            price: state.burgerReducer.totalPrice,
-            ingredients: state.burgerReducer.ingredients,
-            newOrderStatus: state.orderReducer.newOrder,
-            userId: state.signuploginReducer.userId
-            
 
 
-      };
-};
 
-const mapDispatchToProps = dispatch =>{
-      return{
-            saveOrderAction: newOrder => dispatch(actions.saveOrder(newOrder))
-      };
-};
-export default withRouter(connect(mapStateToProps,mapDispatchToProps ) (ContactData));
+
+export default ContactData;
